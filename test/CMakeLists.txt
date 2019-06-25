@@ -16,14 +16,18 @@ endif()
 find_package(mimalloc 1.0 REQUIRED)
 
 # Tests
-add_executable(static-override  main-override.c)
-target_link_libraries(static-override PUBLIC mimalloc-static)
+if(TARGET mimalloc-static)
+  add_executable(static-override main-override.c)
+  target_link_libraries(static-override PUBLIC mimalloc-static)
 
-add_executable(static-override-cxx  main-override.cpp)
-target_link_libraries(static-override-cxx PUBLIC mimalloc-static)
+  add_executable(static-override-cxx main-override.cpp)
+  target_link_libraries(static-override-cxx PUBLIC mimalloc-static)
+endif()
 
-add_executable(dynamic-override  main-override.c)
-target_link_libraries(dynamic-override PUBLIC mimalloc)
+if(TARGET mimalloc)
+  add_executable(dynamic-override main-override.c)
+  target_link_libraries(dynamic-override PUBLIC mimalloc)
 
-add_executable(dynamic-override-cxx  main-override.cpp)
-target_link_libraries(dynamic-override-cxx PUBLIC mimalloc)
+  add_executable(dynamic-override-cxx main-override.cpp)
+  target_link_libraries(dynamic-override-cxx PUBLIC mimalloc)
+endif()
