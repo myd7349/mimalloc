@@ -167,7 +167,7 @@ if(MI_BUILD_OBJECT)
   target_compile_options(mimalloc-obj PRIVATE ${mi_cflags})
   target_include_directories(mimalloc-obj PRIVATE include PUBLIC $<INSTALL_INTERFACE:include>)
 
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/mimalloc-obj.dir/src/static.c${CMAKE_C_OUTPUT_EXTENSION}
+  install(FILES $<TARGET_OBJECTS:mimalloc-obj>
           DESTINATION ${mi_install_dir}
           RENAME ${mi_basename}${CMAKE_C_OUTPUT_EXTENSION} )
 endif()
