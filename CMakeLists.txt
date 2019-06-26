@@ -13,7 +13,7 @@ option(MI_BUILD_SHARED "Build mimalloc shared library" ON)
 option(MI_BUILD_STATIC "Build mimalloc static library" ON)
 option(MI_BUILD_OBJECT "Build mimalloc single object file" ON)
 
-set(mi_install_dir "lib/mimalloc-${mi_version}")
+include(GNUInstallDirs)
 
 set(mi_sources
     src/stats.c
@@ -99,7 +99,7 @@ else()
   endif()
 endif()
 message(STATUS "Output library name   : ${mi_basename}")
-message(STATUS "Installation directory: ${mi_install_dir}")
+message(STATUS "Installation directory: ${CMAKE_INSTALL_PREFIX}")
 
 # extra needed libraries
 if(WIN32)
@@ -118,7 +118,7 @@ if(MI_BUILD_SHARED)
     target_compile_definitions(mimalloc PRIVATE MI_MALLOC_OVERRIDE)
   endif()
   target_compile_options(mimalloc PRIVATE ${mi_cflags})
-  target_include_directories(mimalloc PRIVATE include PUBLIC $<INSTALL_INTERFACE:${mi_install_dir}/include>)
+  target_include_directories(mimalloc PRIVATE include PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
   target_link_libraries(mimalloc PUBLIC ${mi_libraries})
 endif()
 
@@ -139,22 +139,25 @@ if(MI_BUILD_STATIC)
     target_compile_definitions(mimalloc-static PRIVATE MI_MALLOC_OVERRIDE)
   endif()
   target_compile_options(mimalloc-static PRIVATE ${mi_cflags})
-  target_include_directories(mimalloc-static PRIVATE include PUBLIC $<INSTALL_INTERFACE:${mi_install_dir}/include>)
+  target_include_directories(mimalloc-static PRIVATE include PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
   target_link_libraries(mimalloc-static PUBLIC ${mi_libraries})
 endif()
 
 # install static and shared library, and the include files
 if(MI_BUILD_SHARED)
-  install(TARGETS mimalloc EXPORT mimalloc DESTINATION ${mi_install_dir} LIBRARY NAMELINK_SKIP)
-  install(FILES "$<TARGET_FILE:mimalloc>" DESTINATION lib)  # duplicate the .so in the lib directory (unversioned)
+  install(TARGETS mimalloc
+    EXPORT mimalloc
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} NAMELINK_SKIP
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
 if(MI_BUILD_STATIC)
-  install(TARGETS mimalloc-static EXPORT mimalloc DESTINATION ${mi_install_dir})
+  install(TARGETS mimalloc-static EXPORT mimalloc DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
-install(FILES include/mimalloc.h DESTINATION ${mi_install_dir}/include)
-install(FILES cmake/mimalloc-config.cmake DESTINATION ${mi_install_dir}/cmake)
-install(FILES cmake/mimalloc-config-version.cmake DESTINATION ${mi_install_dir}/cmake)
-install(EXPORT mimalloc DESTINATION ${mi_install_dir}/cmake)
+install(FILES include/mimalloc.h DESTINATION include)
+install(FILES cmake/mimalloc-config.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/mimalloc)
+install(FILES cmake/mimalloc-config-version.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/mimalloc)
+install(EXPORT mimalloc DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/mimalloc)
 
 # single object file for more predictable static overriding
 if(MI_BUILD_OBJECT)
@@ -168,6 +171,6 @@ if(MI_BUILD_OBJECT)
   target_include_directories(mimalloc-obj PRIVATE include PUBLIC $<INSTALL_INTERFACE:include>)
 
   install(FILES $<TARGET_OBJECTS:mimalloc-obj>
-          DESTINATION ${mi_install_dir}
+          DESTINATION ${CMAKE_INSTALL_LIBDIR}
           RENAME ${mi_basename}${CMAKE_C_OUTPUT_EXTENSION} )
 endif()
